@@ -2,35 +2,61 @@
 
 # What is javascript?
 
-Obtuvo el nombre de Javascript debido a publicidad este fue el mas popular
-Es el lenguaje mas popular para trabajar en el ambiente web
+Javascript is an interpreted language with a JIT (Just in time) runtime compilation
 
-Javascript es un lenguaje interpretado con una compilación JIT (just in time)
-
-Javascript tambien es un lenguaje al que conforme pasa el tiempo se le agregan nuevas funcionalidades mas sin embargo es un lenguaje que trata de generar compatibilidad con versiones anteriores. A día de hoy hay herramientas que nos facilitan este trabajo como los transpiladores y polyfills, estos nos ayudan a generar codigo javascript en una sintaxis vieja para que haya compatibilidad en la mayoria de navegadores y ambientes.
+Javascript has been a language that has gotten new features overtime however is a language that tries to generate compatibility with older versions. There are many tools that facilitate this work like using transpilers and polyfills, these tools help us to generate javascript code in an older syntax in order to have compatibility en most browsers and environments.
 
 # Chapter 2
 
 # Surveying Javascript
 
-Javascript cuenta con tipos de datos primitivos los cuales son asignados por valor, estos valores son mayormente conocidos en el lenguaje como literales
+Javascript is a language that has primitive data types asigned by value, these values are mostly known as literals
 
-Javascript nos permite crear objetos, pero estos son especiales debido a que el lenguaje nos ofrece el patrón de prototipos. Al crear un objeto el lenguaje asigna una propiedad especial la cual es el prototipo y este es un enlace a otro objecto ya existente, esto nos permite encadenar propiedades y metodos en objetos actuando como herencia, cabe resaltar que estos objetos son valores por referencia almacenados en un espacio en memoria
+```js
+// primitive data types
 
-Javascript nos permite aplicar diferentes paradigmas como programación modular, programación orientada a objetos y programación funcional los cuales actuan como un programa independiente definido en un script .js
+let n = 123; // Number
+let str = "Hello"; // String double quotes
+let str2 = 'Single quotes are ok too'; // String single quotes
+let phrase = `can embed another ${str}`; // String backticks
+let myBool = true; // Boolean
+let myNull = null; // Null value
+let myUndefined = undefined; // Undefined value
+let mySymbol = Symbol();
+```
+
+Every literal represents a value in javascript
+
+Javascript allows us to create objects but in a special way because the language works under the Prototype design pattern. When creating an object the language assigns a special property which is a prototype pointer to an existing object, this allows us to chain properties and methods even though the haven't been defined in the original object and acts as inheritance. We must know that when objects are created in javascript the value is stored in a memory heap and creating a reference to that object.
+
+Javascript also allows to apply many paradigms such as modular programming, object oriented programming and functional programming.
 
 # Chapter 3
 
 # Digging to the Roots of JS
 
-Javascript nos permite el acercamiento al concepto de closures, un closure almacena y permite el acceso a variables fuera de su scope a esto lo llamamos un ambiente lexico.
+Javascript grants us the concept of closures too, a closure stores and allows access to variables outside its scope mostly known as lexical environment. We could say that the lexical environment refers to the execution context of a function and all variables declared in its scope
 
-Podemos decir que el ambiente lexico se refiere al contexto de ejecución de una función y todas las variables definidas en este scope son asignadas al contexto de keyword this
+```js
+function makeCounter() {
+  let count = 0;
 
-Javascript nos permite tambien definir el contexto de this a objetos con funciones definidas en el lenguaje
+  return function() {
+    return count++;
+  };
+}
+
+let counter = makeCounter();
+
+alert( counter() ); // 0
+alert( counter() ); // 1
+alert( counter() ); // 2
+```
+
+We can se that the variable count keeps record of the values and whenever we call the returned function it increments the value in the scope of the makeCounter() function
 
 # Chapter 4
 
 # The Bigger Picture
 
-Javascript proveé muchas herramientas para los desarolladores, las cuales es recomendadas saber para ser mejores desarrolladores y evitar bugs en nuestras aplicaciones, es importante tener estos conceptos claros y conocer el lenguaje a fondo.
+Javascript provides us many features and it is good to know those concepts to be better javascript developers, prevent bugs in our applications, etc
