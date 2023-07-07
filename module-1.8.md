@@ -535,3 +535,537 @@ const drawing = new GraphicObject();
 // children is going to store any object we may define
 drawing.children.push(new Circle());
 ```
+**Decorator:** This pattern lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
+
+```js
+class Shape {
+	constructor(color) {
+		// how do we add the behavior to the Circle to print the color
+		this.color = color;
+	}
+}
+class Circle extends Shape {
+	constructor(radius=0) {
+		super();
+		this.radius = radius;
+	}
+	resize(factor) {...}
+
+	toString() {
+		return `A circle of radius ${this.radius}`;
+	}
+}
+
+// Decorator to wrap the classes
+class ColoredShaped extends Shape {
+	constructor(shape, color) {
+		super();
+		this.shape = shape;
+		this.color = color;
+	}
+
+	// override
+	toString() {
+		// reuse the parent class implementation and add additional behavior 
+		return `${this.shape.toString()} has the color ${this.color}`;
+	}
+}
+
+const circle = new Circle(2);
+// create the wrapper and pass in the shape
+const redCircle = new ColoredShape(circle, 'red');
+```
+
+**Facade:** This is a pattern that provides a simplified interface to a library, a framework, or any other complex set of classes.
+
+```js
+class Buffer extends Array {
+	constructor(width, height) {
+		super();
+		this.width = width;
+		this.height = height;
+		this.alloc(width*height);
+	}
+
+	write(text, position) {...}
+}
+
+class Viewport {
+	constructor(buffer = new Buffer()) {
+		this.buffer = buffer;
+		this.offset = 0;
+	}
+
+	append(text, post) {
+		this.buffer.write(text, pos + this.offset);
+	}
+}
+
+// Facade for the previous classes
+class Console {
+	constructor() {
+		this.buffer = new Buffer();
+		this.currentViewport = new Viewport(this.buffer);
+		this.buffers = [this.buffer];
+		this.viewports = this[this.currentViewport];
+	}
+
+	write(text) {
+		this.currentViewport.buffer.write(text);
+	}
+}
+
+const c = new Console();
+c.write();
+```
+
+**Flyweight:** This pattern lets you fit more objects into the available amount of RAM by sharing common parts of state between multiple objects instead of keeping all of the data in each object.
+
+```js
+class FormattedText {
+	constructor(plainText) {
+		this.plainText = plainText;
+		this.caps = new Array(plainText.length).map(() => false);
+	}
+
+	capitalize(start, end) {
+		for (let i = start; i <= end; i++) {
+			this.caps[i] = true;	
+		}
+	}
+	
+	toString() {...}
+}
+
+class FlyweightFormattedText {
+	constructor(plainText) {
+		this.plainText = plainText;
+		this.formatting = [];
+		// to capitalize the text we need to share the state to another object
+	}
+
+	getRange(start, end) {
+		const range = new TextRange(start, end);
+		this.formatting.push(range);
+		return range;
+	}
+}
+
+// will hold the state for capitalization
+class Range {...}
+
+const text = 'My text';
+const ft = new FormattedText(text);
+ft.capitalize(10, 15);
+
+const fft = new FlyweightFormattedText(text);
+fft.getRange(16, 19).capitalize = true;
+```
+
+**Proxy: ** This pattern lets you provide a substitute or placeholder for another object. A proxy controls access to the original object, allowing you to perform something either before or after the request gets through to the original object.
+
+```js
+class Subject {
+    request() {}
+}
+
+class RealSubject extends Subject {
+    public request() {
+        console.log('RealSubject: Handling request.');
+    }
+}
+
+class Proxy extends Subject {
+    /**
+     * The Proxy maintains a reference to an object of the RealSubject class. It
+     * can be either lazy-loaded or passed to the Proxy by the client.
+     */
+    constructor(realSubject) {
+        this.realSubject = realSubject;
+    }
+
+    /**
+     * The most common applications of the Proxy pattern are lazy loading,
+     * caching, controlling the access, logging, etc. A Proxy can perform one of
+     * these things and then, depending on the result, pass the execution to the
+     * same method in a linked RealSubject object.
+     */
+    request() {
+        if (this.checkAccess()) {
+            this.realSubject.request();
+            this.logAccess();
+        }
+    }
+
+    checkAccess() {
+        // Some real checks should go here.
+        console.log('Proxy: Checking access prior to firing a real request.');
+
+        return true;
+    }
+
+    logAccess() {
+        console.log('Proxy: Logging the time of request.');
+    }
+}
+
+/**
+ * The client code is supposed to work with all objects (both subjects and
+ * proxies) via the Subject interface in order to support both real subjects and
+ * proxies. In real life, however, clients mostly work with their real subjects
+ * directly. In this case, to implement the pattern more easily, you can extend
+ * your proxy from the real subject's class.
+ */
+function clientCode(subject: Subject) {
+    // ...
+
+    subject.request();
+
+    // ...
+}
+
+console.log('Client: Executing the client code with a real subject:');
+const realSubject = new RealSubject();
+clientCode(realSubject);
+
+console.log('');
+
+console.log('Client: Executing the same client code with a proxy:');
+const proxy = new Proxy(realSubject);
+clientCode(proxy);
+```
+
+# Behavioral Design Patterns
+
+**Chain of responsibility:** This pattern lets you pass requests along a chain of handlers. Upon receiving a request, each handler decides either to process the request or to pass it to the next handler in the chain.
+
+```js
+class Handler {
+	setNext() {...}
+	handle() {...}
+}
+
+class MainHandler extends Handler {
+	nextHandler;
+	setNext(handler) {...}
+	handle(request) {...}
+}
+
+class BossHandler extends MainHandler {
+	handle(request) {
+		...
+		return super.handle(request);
+	}
+}
+
+class EmployeeHandler extends MainHandler {
+	handle(request) {
+		...
+		return super.handle(request);
+	}
+}
+
+class ClientHandler extends MainHandler {...}
+
+const boss = new BossHandler();
+const employee = new EmployeeHandler();
+
+// Chain the responsibilities
+boss.setNext(employee).setNext(client);
+```
+
+**Command: ** This pattern turns a request into a stand-alone object that contains all information about the request.
+
+```js
+class BankAccount {
+	constructor(balance=0) {
+		this.balance = balance;
+	}
+
+	deposit(amount) {...}
+	withdraw(amount) {...}
+}
+
+class BankAccountCommand {
+	constructor(account, action, amount) {
+		this.account = account;
+		this.action = action;
+		this.amount = amount;
+	}
+
+	call() {
+		switch(this.action) {
+			case 'deposit':
+				this.account.deposit(this.amount);
+				break;
+		}
+	}
+}
+
+const bankAccount = new BankAccount();
+const command = new BankAccountCommand(bankAccount, 'deposit',50);
+command.call();
+```
+
+**Iterator:** This pattern lets you traverse elements of a collection without exposing its underlying representation (list, stack, tree, etc.).
+
+```js
+class Stuff {
+	constructor() {
+		this.a = 11;
+		this.b = 22;
+	}
+	[Symbol.iterator]() {
+		let i = 0;
+		let self = this;
+		return {
+			next: function() {
+				done: i > 1,
+				value: self[i++ === 0 ? 'a' : 'b']
+			}
+		}	
+	}
+}
+
+const values = [100, 200, 300];
+const stuff = new Stuff();
+for (let item of stuff.backwards) {
+	console.log(`${item}`);
+}
+```
+
+**Mediator:** This pattern lets you reduce chaotic dependencies between objects. The pattern restricts direct communications between the objects and forces them to collaborate only via a mediator object.
+
+```js
+class Person {
+	constructor(name) {
+		this.name = name;
+		this.chatLog = [];
+	}
+
+	recieve(sender, message) {...}
+	say(message) {...}
+}
+
+// This mediator class lets us interact with instances of the Person class
+class ChatRoom {
+	constructor() {
+		// people stores records of the Person class
+		this.people = [];
+	}
+
+	join() {...}
+	broadcast(source, message) {...}
+	message(source, destination, message) {...}
+}
+
+const chatRoom = new ChatRoom();
+const john = new Person('John');
+const jane = new Person('Jane');
+
+room.join(john);
+room.join(jane);
+
+john.say('Hi');
+```
+
+**Memento:** This pattern lets you save and restore the previous state of an object without revealing the details of its implementation.
+
+```js
+class BankAccount {
+	constructor(balance) {...}
+	deposit(amount) {
+		...
+		return new Memento(this.balance);
+	}
+	restore(memento) {
+		this.balance = m.balance;
+	}
+}
+
+// Holds the state for the bank account balance
+class Memento {
+	constructor(balance) {...}
+}
+
+const bankAccount = new BankAccount(100);
+const m1 = ba.deposit(50);
+const m2 = ba.deposit(25);
+ba.restore(m1);
+```
+
+**Observer:** This pattern allows some objects to notify other objects about changes in their state.
+
+```js
+class Event {
+	constructor() {
+		this.handlers = new Map();
+		this.count = 0;
+	}
+
+	subscribe(handler) {
+		this.handlers.set(++this.count, handler);
+		return this.count;
+	}
+	unsubscribe(idx) {
+		this.handlers.delete(idx);
+	}
+
+	fire(sender, args) {
+		this.handlers.forEach((v,k) => v(sender, args));
+	}
+}
+
+class Person {...}
+
+const person = new Person();
+const sub = person.fallsIll.subscribe((s,a) => {
+	// s is the subscription value
+	// a is an additional arguments
+});
+```
+
+**State:** This pattern allows an object to change the behavior when its internal state changes.
+
+```js
+const State = Object.freeze({
+	offHook: 'off hook',
+	...
+});
+
+const Trigger = Object.freeze({
+	callDialed: 'dialNumber',
+	...
+});
+
+const rules = {};
+rules[State.offHook] = [
+	{
+		trigger: Trigger.callDialed,
+		state: State.connecting
+	}
+];
+
+const state = State.offHook;
+const exitState = State.onHook;
+
+// here we change the behavior when the state changes
+const getInput = function() {
+	const prompt = ['My state'];
+	for(let i = 0; i < rules[state].length; i++) {
+		const t = rules[state][i].trigger;
+		prompt.push(`${i}. ${t}`);
+	}
+}
+```
+
+**Strategy:** This pattern turns a set of behaviors into objects and makes them interchangeable inside original context object.
+
+```js
+
+const OutputFormat = Object.freeze({...});
+class TextProcessor {
+	constructor(outputFormat) {
+		this.buffer = [];
+		this.setOutputFormat(outputFormat);
+	}
+
+	setOutputFormat(format) {...}
+	appendListItem(items) {
+		// in this method we append the new objects to the original object interchangeably
+		this.listStrategy.start(this.buffer);
+		for (let item of items) {
+			this.listStrategy.addListItem(this.buffer, item);
+		}
+		this.listStrategy.end(this.buffer);
+	}
+}
+
+class ListStrategy {
+	start(buffer) {}
+	end(bugger) {}
+	addListItem(buffer, item) {}
+}
+
+class HtmlListStrategy extends ListStrategy {
+	start(buffer) {
+		buffer.push('<ul>');
+	}
+	end(buffer) {
+		buffer.push('</ul>');
+	}
+	addListItem(buffer, item) {
+		buffer.push(`<li>${item}</li>`);
+	}
+}
+```
+
+**Template Method:** This pattern allows you to define a skeleton of an algorithm in a base class and let subclasses override the steps without changing the overall algorithm’s structure.
+
+```js
+class Game {
+	...
+	// template method
+	run() {
+		this.start();
+		while(!this.haveWinner) {
+			this.takeTurn();
+		}
+	}
+}
+
+class Chess extends Game {
+	constructor() {
+		super();
+		this.maxTurns = 10;
+		this.turn = 1;
+	}
+	
+	// override the methods from the parent class but not the template method
+	
+}
+
+const chess = new Chess();
+chess.run();
+```
+
+**Visitor: ** This pattern allows adding new behaviors to existing class hierarchy without altering any existing code.
+
+```js
+class NumberExpression {
+	constructor() {
+		this.value = value;
+	}
+	
+	print(buffer) {
+		buffer.push(this.value.toString());
+	}
+}
+
+class AdditionExpression {
+	constructor(left, right) {
+		this.left = left;
+		this.right = right;
+	}
+	
+	print(buffer) {
+		buffer.push('(');
+		this.left.print(buffer);
+		buffer.push('+');
+		this.right.print(buffer);
+		buffer.push(')');
+	}
+}
+
+const expression = new AdditionExpression(
+	new NumberExpression(1),
+	new AdditionExpression(
+		new NumberExpression(2),
+		new NumberExpression(3)
+	)
+);
+
+const buffer = [];
+// The buffer is the visitor it traverses each expression and adds additional behavior without altering the classes
+expression.print(buffer);
+```
