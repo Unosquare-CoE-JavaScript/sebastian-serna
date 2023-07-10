@@ -295,3 +295,163 @@ vm.mount('#app')
 **Vue CLI**
 
 In order to scaffold a Vue project we can use the Vue CLI to generate our project structure by running the following command `npm init vue@lastest`
+
+To start working with components the initial scaffold has file with a .vue extension in these files you can define the selectors, properties and mark up your views
+
+```html
+<template>
+	<p>{{ msg }}</p>
+</template>
+
+<script>
+	export default {
+		// component name
+		name: 'App',
+		data() {
+			return {msg: 'Hello world'}
+		}
+	}
+</script>
+```
+
+**Child components**
+
+```html
+<template>
+	<p>{{ msg }}</p>
+</template>
+
+<script>
+	export default {
+		// component name
+		name: 'ChildComponent',
+		data() {
+			return {msg: 'I am a child component'}
+		}
+	}
+</script>
+```
+
+After creating the component we need to register it in the app
+
+```js
+import {createApp} from 'vue';
+import App from './App.vue';
+import ChildComponent from './ChildComponent.vue';
+
+const vm = createApp(App);
+// not recommended
+// vm.component('ChildComponent', ChildComponent);
+vm.mount('#app');
+```
+
+```html
+<script>
+	// In the app component register the child component
+	export default {
+		name: 'App',
+		components: {
+			ChildComponent,
+		}
+	}
+</script>
+```
+
+**Communicating between components and emitting events**
+
+These features allow us to pass data from one component to another
+
+```html
+<!-- pass props and listen for events -->
+<childcomponent :age="age" @age-change="age++"></childcomponent>
+```
+Set up the child component to recieve the props and emit events
+```html
+<template>
+	The user is {{age}} years old
+<template>
+<script>
+export default {
+	name: 'ChildComponent',
+	props: ['age'],
+	methods: {
+		onClickAge() {
+			this.$emit('age-change')
+		}
+	}
+}
+</script>
+```
+
+**Routing**
+
+We refer to routing as the process to navigate between pages in our application, Vue comes with a router API that facilitate this task
+
+To install the package we need to run the command `npm install vue-router`
+
+```js
+import {createRouter, createWebHistory} from 'vue-router';
+import Component from './components';
+
+export default const router = createRouter({
+	history: createWebHistory('my_url'),
+	routes: [
+		{
+			path: '/',
+			name: 'my-component',
+			component: Component
+		},
+		// lazy loading
+		{
+			path: '/second-component',
+			name: 'second-component',
+			component: () => import('./components/SecondComponent.vue'),
+		}
+	]
+});
+```
+
+```js
+import router from './router';
+
+// set up vue
+const app = Vue.createApp();
+app.use(router);
+```
+
+**Navigation**
+
+Vue router provides with the `router-link` component to set up our navigation
+
+```html
+<router-link to="home">Home</router-link>
+```
+
+**Guarding routes**
+
+Vue router provides guards to write side effect in order to decide if the user can access the route
+
+`beforeRouteLeave`
+`beforeEach`
+`beforeRouteUpdate`
+`beforeEnter`
+`beforeRouteEnter`
+`beforeResolve`
+`afterEach`
+
+```js
+const routes = [
+	 {
+		 name: 'my-route',
+		 component: MyComponent,
+		 // implementing the guards
+		 beforeEnter: (to, from, next) => {
+			next();
+		}
+	 }
+];
+
+router.beforeEach((to, from, next) => {
+	next();
+});
+```
