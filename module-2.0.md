@@ -455,3 +455,72 @@ router.beforeEach((to, from, next) => {
 	next();
 });
 ```
+
+# Composition API
+
+The composition API is a feature that changes the way we write components
+
+**Mixins**
+
+Mixins are a flexible way to distribute reusable functionalities for Vue components
+
+```js
+// mixin
+const mixin {
+	data() {
+		return {
+			offset: 0,
+		}
+	},
+	mounted() {
+		window.addEventListener('scroll', this.update);
+	},
+	methods: {
+		update() {
+			this.offset = window.pageYOffset;
+		}
+	}
+}
+
+// app code
+export default {
+	name: 'App',
+	mixins: [mixin],
+}
+```
+
+**Reactive references**
+
+Vue provides us features to track changes in data of our components
+
+```js
+import {ref,reactive} from 'vue';
+
+
+export default {
+	name: 'App',
+	setup() {
+		// ref function returns an object that keeps track of the changes and works only with primitive values
+		let num = ref(0);
+		// reactive function keeps track of the changes
+		const user = reactive({
+			name: 'My User',
+		})
+		function increment() {
+			num.value++;
+		}
+		return {
+			num,
+			increment,
+			user,
+		}
+	}
+}
+```
+
+there are more functions that the composition API provides us to write our components
+
+`computed`
+`watchEffect`
+`watch`
+`toRefs`
